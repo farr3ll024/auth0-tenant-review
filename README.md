@@ -7,7 +7,7 @@ A portable single-page interface for comparing Auth0 tenant exports, reviewing c
 
 ## Run locally
 
-Requires Node.js 20 or newer.
+Requires Node.js 20.14.0 or newer.
 
 ```bash
 git clone <your-repository-url>
