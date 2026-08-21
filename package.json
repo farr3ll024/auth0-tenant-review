@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "engines": { "node": ">=20.14.0" },
-  "scripts": { "dev": "vite", "build": "tsc --noEmit && vite build", "preview": "vite preview" },
+  "scripts": { "dev": "vite --configLoader runner", "build": "tsc --noEmit && vite build --configLoader runner", "preview": "vite preview" },
   "dependencies": { "react": "19.2.6", "react-dom": "19.2.6" },
   "devDependencies": { "@types/node": "22.19.19", "@types/react": "19.2.14", "@types/react-dom": "19.2.3", "@vitejs/plugin-react": "4.7.0", "typescript": "5.9.3", "vite": "6.4.1" }
 }

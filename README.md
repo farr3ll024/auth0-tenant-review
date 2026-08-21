@@ -20,14 +20,20 @@ Open the local URL shown by Vite. To create a production bundle, run `npm run bu
 
 ## Current capabilities
 
-- Source and target tenant summary
-- Migration-readiness overview
-- Searchable and filterable Auth0 object comparison
-- Status and impact indicators
-- Difference inspector and reviewer notes
-- JSON export picker for the next integration step
+- Local import of source and target JSON exports
+- Normalized comparison of applications, connections, APIs, Actions, organizations, and Rules
+- Search, resource tabs, and status filters
+- Impact-weighted migration-readiness score
+- Difference decisions, reviewer notes, and review queue
+- Downloadable JSON migration report
 
-The current release is a UI prototype with representative data. Tenant-export parsing and Auth0 Management API connections are not yet implemented.
+Tenant Lens starts empty and contains no bundled tenant data. Import files are parsed entirely in the browser and are not transmitted or persisted.
+
+## Supported JSON shape
+
+Each file must contain a JSON object with one or more supported collection arrays: `clients` (or `applications`), `connections`, `resourceServers` (or `resource_servers`/`apis`), `actions`, `organizations`, and `rules`. Optional top-level `tenant`, `tenant_name`, and `domain` fields improve the tenant labels. Choose the source file first and target file second.
+
+For safer comparison, volatile IDs, timestamps, client secrets, and signing keys are excluded from normalized equality checks. Raw secret values are never rendered in the interface or included in downloaded reports.
 
 ## Handling tenant data safely
 
