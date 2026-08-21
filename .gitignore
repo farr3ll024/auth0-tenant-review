@@ -32,6 +32,15 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 
+# Auth0 tenant exports and local comparison data
+/tenant-exports/
+/auth0-exports/
+/review-data/
+*.tenant-export.json
+*.auth0-export.json
+*.auth0.local.json
+*.tenant-review.json
+
 # vercel
 .vercel
 
