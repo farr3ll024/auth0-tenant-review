@@ -14,9 +14,19 @@ const collections: Array<[string[], string]> = [
 ];
 const ignored = new Set(["client_secret", "signing_keys", "created_at", "updated_at", "id"]);
 
-function clean(value: unknown): unknown {
-  if (Array.isArray(value)) return value.map(clean);
-  if (value && typeof value === "object") return Object.fromEntries(Object.entries(value as Record<string, unknown>).filter(([key]) => !ignored.has(key)).sort(([a], [b]) => a.localeCompare(b)).map(([key, item]) => [key, clean(item)]));
+function normalizedName(name: string) {
+  return name.normalize("NFKC").trim().replace(/\s+/g, " ").toLocaleLowerCase("en-US");
+}
+
+function resourceKey(type: string, value: Record<string, unknown>, name: string) {
+  if (type === "Application" || type === "API") return `${type}:name:${normalizedName(name)}`;
+  const identity = firstString(value, ["client_id", "identifier", "name", "id"]);
+  return `${type}:id:${identity}`;
+}
+
+function clean(value: unknown, extraIgnored: Set<string>): unknown {
+  if (Array.isArray(value)) return value.map(item => clean(item, extraIgnored));
+  if (value && typeof value === "object") return Object.fromEntries(Object.entries(value as Record<string, unknown>).filter(([key]) => !ignored.has(key) && !extraIgnored.has(key)).sort(([a], [b]) => a.localeCompare(b)).map(([key, item]) => [key, clean(item, extraIgnored)]));
   return value;
 }
 function firstString(record: Record<string, unknown>, keys: string[]) { for (const key of keys) if (typeof record[key] === "string" && record[key]) return record[key] as string; return "Unnamed object"; }
@@ -35,6 +45,7 @@ export function parseTenant(raw: unknown, fileName: string): Tenant {
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) throw new Error(`${fileName} must contain a JSON object.`);
   const data = raw as Record<string, unknown>;
   const resources: Resource[] = [];
+  const resourceKeys = new Set<string>();
   for (const [aliases, type] of collections) {
     const key = aliases.find(alias => Array.isArray(data[alias]));
     if (!key) continue;
@@ -42,8 +53,10 @@ export function parseTenant(raw: unknown, fileName: string): Tenant {
       if (!entry || typeof entry !== "object" || Array.isArray(entry)) continue;
       const value = entry as Record<string, unknown>;
       const name = firstString(value, ["name", "display_name", "client_id", "identifier", "id"]);
-      const identity = firstString(value, ["client_id", "identifier", "name", "id"]);
-      resources.push({ type, name, key: `${type}:${identity}`, value });
+      const resourceKeyValue = resourceKey(type, value, name);
+      if (resourceKeys.has(resourceKeyValue)) throw new Error(`${fileName} contains more than one ${type} named "${name}". Name-based comparison would be ambiguous.`);
+      resourceKeys.add(resourceKeyValue);
+      resources.push({ type, name, key: resourceKeyValue, value });
     }
   }
   if (!resources.length) throw new Error(`${fileName} has no supported Auth0 collections. Expected clients, connections, resourceServers, actions, organizations, or rules.`);
@@ -59,7 +72,8 @@ export function compareTenants(source: Tenant, target: Tenant): ComparisonItem[]
     const a = sourceMap.get(key); const b = targetMap.get(key); const type = (a ?? b)!.type;
     let status: Status = "match"; let changedFields: string[] = [];
     if (!b) status = "missing"; else if (!a) status = "target-only"; else {
-      const left = clean(a.value) as Record<string, unknown>; const right = clean(b.value) as Record<string, unknown>;
+      const typeSpecificIgnored = new Set(type === "Application" ? ["client_id", "name", "display_name"] : type === "API" ? ["identifier", "name", "display_name"] : []);
+      const left = clean(a.value, typeSpecificIgnored) as Record<string, unknown>; const right = clean(b.value, typeSpecificIgnored) as Record<string, unknown>;
       changedFields = [...new Set([...Object.keys(left), ...Object.keys(right)])].filter(field => JSON.stringify(left[field]) !== JSON.stringify(right[field]));
       if (changedFields.length) status = "changed";
     }

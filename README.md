@@ -33,6 +33,8 @@ Tenant Lens starts empty and contains no bundled tenant data. Import files are p
 
 Each file must contain a JSON object with one or more supported collection arrays: `clients` (or `applications`), `connections`, `resourceServers` (or `resource_servers`/`apis`), `actions`, `organizations`, and `rules`. Optional top-level `tenant`, `tenant_name`, and `domain` fields improve the tenant labels. Choose the source file first and target file second.
 
+Applications and APIs are paired across tenants by normalized, case-insensitive name because their Auth0 IDs are tenant-specific. Leading and trailing whitespace, repeated internal whitespace, Unicode presentation differences, and letter case do not affect matching. Duplicate Application or API names within one export are rejected as ambiguous instead of being silently combined.
+
 For safer comparison, volatile IDs, timestamps, client secrets, and signing keys are excluded from normalized equality checks. Raw secret values are never rendered in the interface or included in downloaded reports.
 
 ## Handling tenant data safely
