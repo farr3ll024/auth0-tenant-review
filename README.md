@@ -20,7 +20,7 @@ Open the local URL shown by Vite. To create a production bundle, run `npm run bu
 
 ## Current capabilities
 
-- Local import of source and target JSON exports
+- Independent local import of source and target JSON exports, so files can be selected from different directories
 - Normalized comparison of applications, connections, APIs, Actions, organizations, and Rules
 - Search, resource tabs, and status filters
 - Impact-weighted migration-readiness score
@@ -31,7 +31,7 @@ Tenant Lens starts empty and contains no bundled tenant data. Import files are p
 
 ## Supported JSON shape
 
-Each file must contain a JSON object with one or more supported collection arrays: `clients` (or `applications`), `connections`, `resourceServers` (or `resource_servers`/`apis`), `actions`, `organizations`, and `rules`. Optional top-level `tenant`, `tenant_name`, and `domain` fields improve the tenant labels. Choose the source file first and target file second.
+Each file must contain a JSON object with one or more supported collection arrays: `clients` (or `applications`), `connections`, `resourceServers` (or `resource_servers`/`apis`), `actions`, `organizations`, and `rules`. Optional top-level `tenant`, `tenant_name`, and `domain` fields improve the tenant labels. Use the separate Source and Target controls to select the files in either order and from different directories.
 
 Applications and APIs are paired across tenants by normalized, case-insensitive name because their Auth0 IDs are tenant-specific. Leading and trailing whitespace, repeated internal whitespace, Unicode presentation differences, and letter case do not affect matching. Duplicate Application or API names within one export are rejected as ambiguous instead of being silently combined.
 
